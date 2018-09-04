@@ -11,12 +11,10 @@ sysinf <- Sys.info()
 if (tolower(sysinf[['sysname']]) == "windows") {
     # windows of mac osx
     n_cores = 1
-    setwd("C:\\Users\\amant\\Desktop\\Fall2017\\Stats506-ComputationTools\\repo\\trunk\\personalProject") 
 } else {
     # linux
     n_cores = 4
     library(gputools)
-    setwd("/home/ataxali/stats506/project/")
 }
 
 # default values
@@ -40,15 +38,11 @@ if (city == "ch") {
     t_data = sf_data
 }
 index_col = 2
-# t_data = t_data %>% group_by(idx) %>% summarize('temp'=mean(temp))
 t_data = arrange(t_data, t_data$idx)
-#t_data = t_data[1:500, ]
-#t_data = sapply(t_data[1:1000, ], rep, 5)
 
-############
-# Faster
-############
-# sample usage: calc_dist(dat, centers, tcrossprod)
+################################################
+# Euclidean Distance using Matrix Multiplication
+################################################
 euc_dist_crossprod <- function(dat, centers, tcrossprod_f, mat_prod_lim=50) {
     # no. of rows in centers should match number of rows in dat
     start.time <- Sys.time()
@@ -65,11 +59,10 @@ euc_dist_crossprod <- function(dat, centers, tcrossprod_f, mat_prod_lim=50) {
     return(result)
 }
 
-############
-# C++ omg
-############
+################################################
+# Euclidean Distance C++ Implementation
+################################################
 sourceCpp('./euc_dist_c.cpp')
-# sourceCpp('./kmeans.cpp')
 
 ############
 # dat and centers are 2 dimensional matrixes 
@@ -81,7 +74,6 @@ euc_dist_r <- function(dat, centers) {
     if (printgranular) cat("euc_dist_R runtime: ", time.taken, "\n")
     return(res)
 }
-
 
 
 # read in the arguments listed at the command line
@@ -148,7 +140,6 @@ kmeans_custom <- function(dat, init_centers, iter_max=10, dist_f, ...) {
 
 cat("Monte-Carlo K-Means\n")
 start.time <- Sys.time()
-#system.time({
     parallel.kmeans <- function(i) {
         dat = as.matrix(t_data)
         rownames(dat) = dat[, index_col]
@@ -171,18 +162,11 @@ start.time <- Sys.time()
     }
     results = mclapply(rep(num_clusters, num_iterations), FUN=parallel.kmeans,
                        mc.cores=n_cores)
-#})
 time.taken <- Sys.time() - start.time
 cat("K-Means MC runtime: ", time.taken, "\n")
 
 
-
-
-
-
-
 cat("Aggregate M.C. Results\n")
-#system.time({
 results = lapply(results, function(result) {result[order(result$idx), ]})
 agg_clus = cbind(results[[1]][, 1], sapply(results, function(x) {x[, 2]}))
 summer_obs = agg_clus[, 1] > 8 & agg_clus[, 1] < 8.5
@@ -203,7 +187,6 @@ parallel.fixLabels <- function(i){
 }
 fixed_results = sapply(mclapply(2:dim(agg_clus)[2], FUN=parallel.fixLabels,
                                 mc.cores=n_cores), cbind)
-#})
 
 consecutive_matches <- function(arr, n=7){
     res = arr
@@ -215,7 +198,6 @@ consecutive_matches <- function(arr, n=7){
 }
 
 cols = consecutive_matches(apply(fixed_results, 1, calc_mode))
-#cols = (apply(fixed_results,1,calc_mode) == 2)
 cols[cols == 1] = 2 # red
 cols[cols == 0] = 1 # black
 
@@ -255,11 +237,4 @@ for (i in non_empty_clusters) {
 cat("Start of Summer:", agg_clus[idx_1, 1], "\n")
 cat("End of Summer:", agg_clus[idx_2, 1], "\n")
 cat("Std. Dev.:", sqrt(variance), "\n")
-
-
-#mean(apply(fixed_results, 1, var))
-
-#var(agg_clus[which(cols == 2), 1])
-
-#mean(var(fixed_results))
 

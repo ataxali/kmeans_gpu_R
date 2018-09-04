@@ -8,11 +8,9 @@ sysinf <- Sys.info()
 if (tolower(sysinf[['sysname']]) == "windows") {
     # windows of mac osx
     n_cores = 1
-    setwd("C:\\Users\\amant\\Desktop\\Fall2017\\Stats506-ComputationTools\\repo\\trunk\\personalProject") 
 } else {
     # linux
     n_cores = 4
-    setwd("/home/ataxali/stats506/project/")
 }
 num_iterations = 40
 k_means_iter = 100
@@ -29,8 +27,6 @@ if(length(args) != 0){
 # print script settings
 cat("num_iterations=", num_iterations, "  n_cores=", n_cores, 
     "  k_means_iter=", k_means_iter, "\n")
-#cat("LibPaths=", .libPaths(), "\n")
-#cat("WorkDir=", getwd(), "\n")
 
 
 cat("Reading Data into Memory\n")
@@ -50,7 +46,6 @@ system.time({
 
 cat("Monte-Carlo K-Means\n")
 num_clusters = 3
-#init_centers = matrix(c(0.5,7,12.5,-10,20,0), ncol=2)
 system.time({
     # k means is sensitive to data order
     # add shuffle make monte carlo meaningful
@@ -102,26 +97,7 @@ cat("End of Summer:", agg_clus[idx_2, 1], "\n")
 cat("Variance:", mean(apply(fixed_results,1,var)), "\n")
 
 
-#cols = apply(fixed_results, 1, function(x) all(x == 2))
-#cols[cols == 1] = 3
-#cols[cols == 0] = 1
-#cols[cols == 3] = 2
-#plot(agg_clus[,1], dat$Wet.Bulb.Temperature, col=cols)
-#plot cols and change 2 to 0
-
-
-
-
-
-
-
-
-
-
-
-
 cat("Aggregate M.C. Results\n")
-#system.time({
 results = lapply(results, function(result) {result[order(result$idx), ]})
 agg_clus = cbind(results[[1]][, 1], sapply(results, function(x) {x[, 2]}))
 summer_obs = agg_clus[, 1] > 8 & agg_clus[, 1] < 8.5
@@ -130,6 +106,7 @@ calc_mode <- function(dat_row) {
     vals <- unique(dat_row)
     vals[which.max(tabulate(match(dat_row, vals)))]
 }
+
 # fix k-means cluster order randomness
 parallel.fixLabels <- function(i){
     summer_lab = calc_mode(agg_clus[summer_obs, i])
@@ -142,7 +119,6 @@ parallel.fixLabels <- function(i){
 }
 fixed_results = sapply(mclapply(2:dim(agg_clus)[2], FUN=parallel.fixLabels,
                                 mc.cores=n_cores), cbind)
-#})
 
 consecutive_matches <- function(arr, n=7){
     res = arr
@@ -154,7 +130,6 @@ consecutive_matches <- function(arr, n=7){
 }
 
 cols = consecutive_matches(apply(fixed_results, 1, calc_mode))
-#cols = (apply(fixed_results,1,calc_mode) == 2)
 cols[cols == 1] = 2 # red
 cols[cols == 0] = 1 # black
 plot(x=t_data$idx, y=t_data$temp, col=cols)
@@ -172,14 +147,3 @@ for (i in non_empty_clusters) {
     center_y = mean(obs_temps)
     variance = variance + sum((obs_idxs - center_x)^2) + sum((obs_temps - center_y)^2)
 }
-
-#cat("Start of Summer:", agg_clus[idx_1, 1], "\n")
-#cat("End of Summer:", agg_clus[idx_2, 1], "\n")
-#cat("Std. Dev.:", sqrt(variance), "\n")
-
-
-#mean(apply(fixed_results, 1, var))
-
-#var(agg_clus[which(cols == 2), 1])
-
-#mean(var(fixed_results))
