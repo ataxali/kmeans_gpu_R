@@ -1,6 +1,6 @@
 # Time Series Clustering using K-Means Algorithm and  Optimizations with Rcpp and GPUTools
 
-## Abstract
+## Motivation
 
 In this project I explored the clustering and computing performance of the K-Means algorithm. In the final report, I discuss the algorithmic complexity and nuances of K-Means (Lloyd’s Algorithm). The first section is concluded by conducting a case study that employs clustering and Monte-Carlo simulation on time series data. 
 
